@@ -9,11 +9,18 @@ function checkData(data) {
   // Якщо об'єкт не пустий повертаємо дані
   // Інакше створюємо помилку,в якості тексту помилки ми використовуємо рядок "Об'єкт пустий".
   // Якщо виникла помилка, повертаємо її повідомлення.
+  if (Object.keys(data).length === 0) {
+    throw new Error("Об'єкт пустий");
+  }
+  return data;
 }
 
 console.log("Завдання: 1 ==============================");
-
-console.log(checkData({}));
+try {
+  console.log(checkData({}));
+} catch (error) {
+  console.log(error.message);
+}
 // Виведе Об'єкт пустий
 console.log(checkData({ name: "John", age: 30, city: "New York" }));
 // Виведе { name: 'John', age: 30, city: 'New York' }
@@ -30,6 +37,11 @@ function parseJson(jsonStr) {
   // Якщо рядок має невірний формат, виникне помилка, яку ми обробляємо у блоку catch.
   // Повертаємо отриманий об'єкт
   // Якщо виникла помилка, повертаємо її повідомлення.
+  try {
+    return JSON.parse(jsonStr);
+  } catch (error) {
+    return error.message;
+  }
 }
 console.log("Завдання: 2 ==============================");
 
@@ -60,11 +72,22 @@ function getAge(age) {
   // Викидаємо помилку
   // Якщо помилки не має повертаємо рядок `Вік користувача: ${age}`
   // Якщо виникла помилка, повертаємо об'єкт з name та message помилки.
+  if (age < 0) {
+    const error = new Error("Вік не може бути менше 0!");
+    error.name = "AgeError";
+    throw error;
+  }
+
+  return `Вік користувача: ${age}`;
 }
 console.log("Завдання: 3 ==============================");
 
 // Виклик функції з від'ємним віком.
-console.log(getAge(-1));
+try {
+  console.log(getAge(-1));
+} catch (error) {
+  console.log({ error: error.message, name: error.name });
+}
 // Виведе { error: 'Вік не може бути менше 0!', name: 'AgeError' }
 // Виклик функції з віком 20.
 console.log(getAge(20));
@@ -83,20 +106,31 @@ function getBookById(books, id) {
   // Якщо книга не знайдена, генерується TypeError з повідомленням Книга з ID ${id} не знайдена!.
   // Повертаємо book
   // Повертаємо текстове представлення помилки
+  const book = books.find((book) => book.id === id);
+
+  if (!book) {
+    const error = new TypeError(`Книга з ID ${id} не знайдена!`);
+    throw error;
+  }
+
+  return `Книга: ${book.title}`;
 }
 console.log("Завдання: 4 ==============================");
 
 // Виклик функції з неіснуючим ID.
-
-console.log(
-  getBookById(
-    [
-      { id: 1, title: "Книга 1" },
-      { id: 2, title: "Книга 2" },
-    ],
-    3
-  )
-);
+try {
+  console.log(
+    getBookById(
+      [
+        { id: 1, title: "Книга 1" },
+        { id: 2, title: "Книга 2" },
+      ],
+      3
+    )
+  );
+} catch (error) {
+  console.log(error);
+}
 // Виведе TypeError: Книга з ID 3 не знайдена!
 console.log(
   getBookById(
@@ -123,6 +157,16 @@ function decodeURIComponentWrapper(encodedString) {
   // Повертаємо декодований рядок
   // Якщо виникла помилка, і ії назва дорівнює URIError повертаємо помилку про неправильний URI формат з повідомленням Помилка декодування URI,
   //  інкше повертаємо текстове представлення помилки
+  try {
+    const decodedString = decodeURIComponent(encodedString);
+    return decodedString;
+  } catch (error) {
+    if (error instanceof URIError) {
+      return "Помилка декодування URI: " + error.message;
+    } else {
+      return error.toString();
+    }
+  }
 }
 
 console.log("Завдання: 5 ==============================");
@@ -144,6 +188,23 @@ function findEvenNumber(numbers) {
   // Якщо число знайдено повертаємо його
   // Виводимо текстове представлення помилки.
   // Незалежно від результату, виводимо вихідний масив.
+  try {
+    let evenNumber;
+    for (const num of numbers) {
+      if (num % 2 === 0) {
+        evenNumber = num;
+        break;
+      }
+    }
+    if (evenNumber === undefined) {
+      throw new Error("У масиві немає чисел, що діляться на 2 без остачі!");
+    }
+    return evenNumber;
+  } catch (error) {
+    return error.toString();
+  } finally {
+    console.log(numbers);
+  }
 }
 
 console.log("Завдання: 6 ==============================");
@@ -170,12 +231,31 @@ function validateUser(user) {
   // Перевіряємо, чи існує email користувача,якщо ні викидуємо помилку з повідомленням "Email користувача не вказано!", а як причину вказуємо об'єкт user.
   // Якщо всі перевірки пройдено успішно виводимо повідомлення "Об'єкт користувача відповідає всім вимогам."
   // Виводимо повідомлення про помилку та причину помилки.
+  if (!user) {
+    throw new Error("Об'єкт користувача не вказано!");
+  }
+
+  if (!user.name) {
+    throw new Error(`Ім'я користувача не вказано! ${JSON.stringify(user)}`);
+  }
+
+  if (!user.email) {
+    const error = new Error(`Email користувача не вказано!`);
+    error.user = user;
+    throw error;
+  }
+
+  console.log("Об'єкт користувача відповідає всім вимогам.");
 }
 
 console.log("Завдання: 7 ==============================");
 
 // Виклик функції з неповним об'єктом користувача.
-validateUser({ name: "John Doe" });
+try {
+  validateUser({ name: "John Doe" });
+} catch (error) {
+  console.error(error.message, error.user);
+}
 // Виведе
 // Email користувача не вказано! { name: 'John Doe' }
 
@@ -192,17 +272,33 @@ function calculateSquareRoot(number) {
   // Перевіряємо, чи число не від'ємне, якщо ні викидуємо помилку про тип недопустимий діапазон з повідомленням Число не повинно бути від'ємним!".
   // Повертаємо корінь квадратний з вхідного значення
   // Повертаємо повідомлення про помилку.
+  if (typeof number !== "number") {
+    throw new TypeError("Аргумент має бути числом!");
+  }
+
+  if (number < 0) {
+    throw new RangeError("Число не повинно бути від'ємним!");
+  }
+
+  return Math.sqrt(number);
 }
 
 console.log("Завдання: 8 ==============================");
 
-console.log(calculateSquareRoot(9));
-// Виведе 3
-console.log(calculateSquareRoot(-9));
-// Виведе Число не повинно бути від'ємним!
-console.log(calculateSquareRoot("abc"));
-// Виведе Аргумент має бути числом!
-
+try {
+  console.log(calculateSquareRoot(9));
+  // Виведе 3
+  console.log(calculateSquareRoot(-9));
+} catch (error) {
+  console.log(error.message);
+  // Виведе "Число не повинно бути від'ємним!"
+}
+try {
+  console.log(calculateSquareRoot("abc"));
+} catch (error) {
+  console.log(error.message);
+  // Виведе "Аргумент має бути числом!"
+}
 // Завдання 9
 
 /**
@@ -218,6 +314,13 @@ function processData(data) {
   // Повертаємо рядок "Дані успішно оброблені"
   // Виводимо stack trace помилки
   // Повертаємо повідомлення помилки
+  data.forEach((element, index) => {
+    if (typeof element !== "number") {
+      throw new TypeError(`Елемент з індексом ${index} має бути числом!`);
+    }
+  });
+
+  return "Дані успішно оброблені";
 }
 
 console.log("Завдання: 9 ==============================");
@@ -227,8 +330,12 @@ console.log(processData([1, 2, 3]));
 // Виведе Дані успішно оброблені
 
 // Викликаємо функцію з неправильними даними
-console.log(processData([1, "two", 3]));
-// Виведе Елемент з індексом 1 має бути числом!
+try {
+  console.log(processData([1, "two", 3]));
+} catch (error) {
+  console.log(error.message);
+  // Виведе Елемент з індексом 1 має бути числом!
+}
 
 // Завдання 10
 /**
@@ -241,6 +348,11 @@ console.log(processData([1, "two", 3]));
 function evaluateExpression(expression) {
   // Повертаємо результат розрахунку
   // Якщо була виявлена помилка повертаємо помилку при виконанні функції eval
+  try {
+    return eval(expression);
+  } catch (error) {
+    return `EvalError: ${error.message} та інформацію про помилку`;
+  }
 }
 
 console.log("Завдання: 10 ==============================");
